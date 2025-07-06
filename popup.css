@@ -1,0 +1,256 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a1a;
+    color: #e8e8e8;
+    width: 380px;
+    min-height: 600px;
+    user-select: none; /* Prevent text selection that might trigger close */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.container {
+    padding: 20px;
+    background: #1a1a1a;
+    position: relative;
+    pointer-events: auto; /* Ensure all interactions work */
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 15px;
+}
+
+.header h1 {
+    color: #ffa116;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.draft-status {
+    font-size: 11px;
+    color: #00c896;
+    margin-top: 5px;
+    display: none;
+    opacity: 0.8;
+}
+
+.section {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #a8a8a8;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #262626;
+    color: #e8e8e8;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    user-select: text; /* Allow text selection in inputs */
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #ffa116;
+    box-shadow: 0 0 0 2px rgba(255, 161, 22, 0.2);
+}
+
+input[type="text"]:disabled,
+input[type="password"]:disabled,
+select:disabled,
+textarea:disabled {
+    background: #1a1a1a;
+    color: #666;
+    cursor: not-allowed;
+}
+
+textarea {
+    min-height: 80px;
+    resize: vertical;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 12px;
+    user-select: text; /* Allow text selection in textareas */
+}
+
+#solution-code {
+    min-height: 120px;
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.input-group input {
+    flex: 1;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: #00af87;
+    color: white;
+    width: 100%;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #00c896;
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: #333;
+    color: #e8e8e8;
+    padding: 10px 14px;
+    font-size: 12px;
+}
+
+.btn-secondary:hover {
+    background: #404040;
+}
+
+.btn-clear {
+    width: 100%;
+    margin-top: 8px;
+    background: #2d1b1b;
+    color: #ff6b6b;
+    border: 1px solid #3d2626;
+}
+
+.btn-clear:hover {
+    background: #3d2626;
+    color: #ff8a8a;
+}
+
+.status-message {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 8px;
+    display: none;
+}
+
+.status-message.success {
+    background: rgba(0, 175, 135, 0.2);
+    color: #00c896;
+    border: 1px solid rgba(0, 175, 135, 0.3);
+    display: block;
+}
+
+.status-message.error {
+    background: rgba(255, 70, 70, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 70, 70, 0.3);
+    display: block;
+}
+
+.status-message.info {
+    background: rgba(255, 161, 22, 0.2);
+    color: #ffa116;
+    border: 1px solid rgba(255, 161, 22, 0.3);
+    display: block;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #333;
+    border-top: 2px solid #00af87;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #404040;
+}
+
+/* Select arrow customization */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a8a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 35px;
+}
+
+/* Placeholder styling */
+::placeholder {
+    color: #666;
+    opacity: 1;
+}
+
+/* Focus states for accessibility */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #ffa116;
+    outline-offset: 2px;
+}

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode GitHub Committer</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 LeetCode → GitHub</h1>
+            <div id="draft-status" class="draft-status"></div>
+        </div>
+
+        <div class="section">
+            <label for="github-token">GitHub Token</label>
+            <div class="input-group">
+                <input type="password" id="github-token" placeholder="Enter your GitHub personal access token">
+                <button id="save-token" class="btn-secondary">Save</button>
+            </div>
+            <div id="token-status" class="status-message"></div>
+        </div>
+
+        <div class="section">
+            <label for="repository">Repository</label>
+            <select id="repository" disabled>
+                <option value="">Select a repository</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <label for="branch">Branch</label>
+            <select id="branch" disabled>
+                <option value="">Select a branch</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <label for="problem-title">Problem Title</label>
+            <input type="text" id="problem-title" placeholder="e.g., Two Sum">
+        </div>
+
+        <div class="section">
+            <label for="language">Programming Language</label>
+            <select id="language">
+                <option value="python">Python</option>
+                <option value="javascript">JavaScript</option>
+                <option value="java">Java</option>
+                <option value="cpp">C++</option>
+                <option value="c">C</option>
+                <option value="go">Go</option>
+                <option value="rust">Rust</option>
+                <option value="typescript">TypeScript</option>
+            </select>
+        </div>
+
+        <div class="section">
+            <label for="problem-statement">Problem Statement</label>
+            <textarea id="problem-statement" placeholder="Paste the problem description here..."></textarea>
+        </div>
+
+        <div class="section">
+            <label for="solution-code">Solution Code</label>
+            <textarea id="solution-code" placeholder="Paste your solution code here..."></textarea>
+        </div>
+
+        <div class="section">
+            <button id="commit-solution" class="btn-primary" disabled>
+                <span id="commit-text">Commit Solution</span>
+                <div id="loading-spinner" class="spinner hidden"></div>
+            </button>
+            <button id="clear-draft" class="btn-secondary btn-clear">Clear Draft</button>
+        </div>
+
+        <div id="status" class="status-message"></div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
