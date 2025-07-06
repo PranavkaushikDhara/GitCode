@@ -76,6 +76,31 @@
         <div id="status" class="status-message"></div>
     </div>
 
+    <!-- Duplicate Solution Modal -->
+    <div id="duplicate-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Solution Already Exists</h3>
+                <button id="modal-close" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>A solution for "<span id="existing-problem-title"></span>" already exists in your repository.</p>
+                <p>What would you like to do?</p>
+            </div>
+            <div class="modal-actions">
+                <button id="replace-solution" class="btn-primary btn-modal">
+                    Replace Solution
+                </button>
+                <button id="create-version" class="btn-secondary btn-modal">
+                    Create Version <span id="version-number">2</span>
+                </button>
+                <button id="cancel-commit" class="btn-cancel btn-modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="popup.js"></script>
 </body>
 </html>

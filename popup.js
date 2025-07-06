@@ -13,7 +13,16 @@ const elements = {
     commitText: document.getElementById('commit-text'),
     loadingSpinner: document.getElementById('loading-spinner'),
     status: document.getElementById('status'),
-    clearDraftBtn: document.getElementById('clear-draft')
+    clearDraftBtn: document.getElementById('clear-draft'),
+    
+    // Modal elements
+    duplicateModal: document.getElementById('duplicate-modal'),
+    modalClose: document.getElementById('modal-close'),
+    existingProblemTitle: document.getElementById('existing-problem-title'),
+    replaceSolutionBtn: document.getElementById('replace-solution'),
+    createVersionBtn: document.getElementById('create-version'),
+    cancelCommitBtn: document.getElementById('cancel-commit'),
+    versionNumber: document.getElementById('version-number')
 };
 
 // Language extensions mapping
@@ -33,6 +42,7 @@ let currentToken = '';
 let repositories = [];
 let branches = [];
 let autoSaveTimeout = null;
+let pendingCommitData = null; // Store commit data when showing duplicate dialog
 
 // Initialize the extension
 document.addEventListener('DOMContentLoaded', async () => {
@@ -72,6 +82,26 @@ function setupEventListeners() {
     elements.branchSelect.addEventListener('change', handleBranchChange);
     elements.commitBtn.addEventListener('click', commitSolution);
     elements.clearDraftBtn.addEventListener('click', handleClearDraft);
+    
+    // Modal event listeners
+    elements.modalClose.addEventListener('click', closeModal);
+    elements.replaceSolutionBtn.addEventListener('click', () => handleDuplicateChoice('replace'));
+    elements.createVersionBtn.addEventListener('click', () => handleDuplicateChoice('version'));
+    elements.cancelCommitBtn.addEventListener('click', closeModal);
+    
+    // Close modal on overlay click
+    elements.duplicateModal.addEventListener('click', (e) => {
+        if (e.target === elements.duplicateModal) {
+            closeModal();
+        }
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !elements.duplicateModal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
     
     // Auto-save form data on input
     elements.problemTitle.addEventListener('input', () => {
@@ -276,32 +306,35 @@ async function commitSolution() {
         const repoFullName = elements.repositorySelect.value;
         const branch = elements.branchSelect.value;
         
-        // Create problem statement file
-        const problemContent = elements.problemStatement.value.trim();
-        const problemPath = `${folderName}/problem.txt`;
+        // Store commit data for potential duplicate handling
+        pendingCommitData = {
+            problemTitle,
+            folderName,
+            language,
+            extension,
+            repoFullName,
+            branch,
+            problemContent: elements.problemStatement.value.trim(),
+            solutionContent: elements.solutionCode.value.trim()
+        };
         
-        // Create solution file
-        const solutionContent = elements.solutionCode.value.trim();
-        const solutionPath = `${folderName}/solution.${extension}`;
+        // Check if folder already exists
+        const folderExists = await checkFolderExists(repoFullName, folderName, branch);
         
-        // Commit message
-        const commitMessage = `Add solution for ${problemTitle}`;
-        
-        // Create both files
-        const problemResult = await createFile(repoFullName, problemPath, problemContent, commitMessage, branch);
-        const solutionResult = await createFile(repoFullName, solutionPath, solutionContent, commitMessage, branch);
-        
-        if (problemResult && solutionResult) {
-            showStatus('Solution committed successfully! 🎉', 'success');
-            await clearFormData(); // Clear saved data after successful commit
-            clearForm();
-        } else {
-            showStatus('Failed to commit solution', 'error');
+        if (folderExists) {
+            // Show duplicate dialog
+            const nextVersion = await getNextVersion(repoFullName, folderName, branch);
+            showDuplicateDialog(problemTitle, nextVersion);
+            setLoading(elements.commitBtn, false);
+            return;
         }
+        
+        // Proceed with normal commit
+        await performCommit(pendingCommitData);
+        
     } catch (error) {
         showStatus('Error committing solution', 'error');
         console.error('Error committing solution:', error);
-    } finally {
         setLoading(elements.commitBtn, false);
     }
 }
@@ -472,6 +505,126 @@ async function clearFormData() {
     } catch (error) {
         console.error('Error clearing form data:', error);
     }
+}
+
+// Check if folder already exists in repository
+async function checkFolderExists(repoFullName, folderName, branch) {
+    try {
+        const response = await makeGitHubRequest(`/repos/${repoFullName}/contents/${folderName}/problem.txt?ref=${branch}`, {
+            token: currentToken
+        });
+        return response.status === 200;
+    } catch (error) {
+        // If we get a 404, folder doesn't exist
+        return false;
+    }
+}
+
+// Get the next version number for a problem
+async function getNextVersion(repoFullName, baseFolderName, branch) {
+    try {
+        let version = 2;
+        while (true) {
+            const versionFolderName = `${baseFolderName}-v${version}`;
+            const exists = await checkFolderExists(repoFullName, versionFolderName, branch);
+            if (!exists) {
+                return version;
+            }
+            version++;
+            // Prevent infinite loop
+            if (version > 50) break;
+        }
+        return version;
+    } catch (error) {
+        console.error('Error getting next version:', error);
+        return 2;
+    }
+}
+
+// Show duplicate solution dialog
+function showDuplicateDialog(problemTitle, nextVersion) {
+    elements.existingProblemTitle.textContent = problemTitle;
+    elements.versionNumber.textContent = nextVersion;
+    elements.duplicateModal.classList.remove('hidden');
+    
+    // Focus on the first button for accessibility
+    setTimeout(() => {
+        elements.replaceSolutionBtn.focus();
+    }, 100);
+}
+
+// Close modal dialog
+function closeModal() {
+    elements.duplicateModal.classList.add('hidden');
+    pendingCommitData = null;
+    setLoading(elements.commitBtn, false);
+}
+
+// Handle user choice from duplicate dialog
+async function handleDuplicateChoice(choice) {
+    if (!pendingCommitData) {
+        closeModal();
+        return;
+    }
+    
+    try {
+        setLoading(elements.commitBtn, true);
+        
+        if (choice === 'replace') {
+            // Use original folder name - this will overwrite
+            await performCommit(pendingCommitData);
+        } else if (choice === 'version') {
+            // Use versioned folder name
+            const nextVersion = parseInt(elements.versionNumber.textContent);
+            const versionedFolderName = `${pendingCommitData.folderName}-v${nextVersion}`;
+            const versionedData = {
+                ...pendingCommitData,
+                folderName: versionedFolderName,
+                problemTitle: `${pendingCommitData.problemTitle} (Version ${nextVersion})`
+            };
+            await performCommit(versionedData);
+        }
+        
+        closeModal();
+    } catch (error) {
+        console.error('Error in duplicate choice handling:', error);
+        showStatus('Error committing solution', 'error');
+        setLoading(elements.commitBtn, false);
+    }
+}
+
+// Perform the actual commit with given data
+async function performCommit(commitData) {
+    const {
+        problemTitle,
+        folderName,
+        extension,
+        repoFullName,
+        branch,
+        problemContent,
+        solutionContent
+    } = commitData;
+    
+    // Create file paths
+    const problemPath = `${folderName}/problem.txt`;
+    const solutionPath = `${folderName}/solution.${extension}`;
+    
+    // Commit message
+    const commitMessage = `Add solution for ${problemTitle}`;
+    
+    // Create both files
+    const problemResult = await createFile(repoFullName, problemPath, problemContent, commitMessage, branch);
+    const solutionResult = await createFile(repoFullName, solutionPath, solutionContent, commitMessage, branch);
+    
+    if (problemResult && solutionResult) {
+        showStatus('Solution committed successfully! 🎉', 'success');
+        await clearFormData(); // Clear saved data after successful commit
+        clearForm();
+    } else {
+        showStatus('Failed to commit solution', 'error');
+    }
+    
+    setLoading(elements.commitBtn, false);
 }
 
 // Handle clear draft button
