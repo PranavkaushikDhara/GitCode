@@ -2,9 +2,10 @@
 
 > Automatically commit and organize your LeetCode solutions to GitHub with beautiful folder structure and smart duplicate handling.
 
+<!--
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Available-blue?style=flat-square&logo=google-chrome)](https://chrome.google.com/webstore/detail/your-extension-id)
 [![Version](https://img.shields.io/badge/version-1.0.0-brightgreen?style=flat-square)](https://github.com/PranavkaushikDhara/GitCode/releases)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE) -->
 
 ## ✨ Features
 
